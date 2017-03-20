@@ -1,0 +1,7 @@
+# backup files
+*.bkp
+*.bak
+
+# PETSc matrices and vectors
+*.dat
+*.dat.info
