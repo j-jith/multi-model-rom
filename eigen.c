@@ -17,8 +17,27 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscInt n_eig, Vec *Qr, Vec
 
     // Problem type
     PEPSetProblemType(pep, PEP_HERMITIAN);
+
+    // Solver type
+    // Linear
+    //PEPSetType(pep, PEPLINEAR);
+    //PEPLinearSetCompanionForm(pep, 1);
+    //PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
+
+    PEPSetType(pep, PEPQARNOLDI);
+    ST st; PEPGetST(pep, &st);
+    STSetTransform(st, PETSC_TRUE);
+    KSP ksp; STGetKSP(st, &ksp);
+    KSPSetType(ksp, KSPPREONLY);
+    PC pc; KSPGetPC(ksp, &pc);
+    PCSetType(pc, PCLU);
+    PCFactorSetMatSolverPackage(pc, MATSOLVERMUMPS);
+
     // Which eigenvalues to compute
-    PEPSetWhichEigenpairs(pep, PEP_SMALLEST_IMAGINARY);
+    //PEPSetWhichEigenpairs(pep, PEP_LARGEST_MAGNITUDE);
+    PEPSetWhichEigenpairs(pep, PEP_TARGET_MAGNITUDE);
+    PEPSetTarget(pep, 100.0);
+
     // No. of eigenvalues to compute
     PEPSetDimensions(pep, n_eig, PETSC_DEFAULT, PETSC_DEFAULT);
     // Tolerance and max. iterations

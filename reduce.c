@@ -31,7 +31,8 @@ void project_matrix(MPI_Comm comm, Mat *M, Vec *Q, PetscInt n_q, Mat *A)
 void check_projection(MPI_Comm comm, Vec u, Vec *Q, PetscInt n_q)
 {
     PetscInt i, *inds;
-    PetscScalar *vals, norm;
+    PetscScalar *vals;
+    PetscReal norm;
     Vec u_new, u_tmp;
 
     // Projection
@@ -161,7 +162,7 @@ void direct_sweep(MPI_Comm comm, Mat *M, Mat *C1, Mat *C2, Mat *K, Vec *b,
         PetscScalar omega_i, PetscScalar omega_f, PetscInt n_omega,
         PetscScalar mu, Vec **u)
 {
-    PetscScalar *omegas, omega2, g_real, g_imag;
+    PetscReal *omegas, omega2, g_real, g_imag;
     PetscInt i;
     Mat A;
 

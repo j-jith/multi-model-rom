@@ -5,3 +5,7 @@
 # PETSc matrices and vectors
 *.dat
 *.dat.info
+matrices
+
+# binary files
+mmr

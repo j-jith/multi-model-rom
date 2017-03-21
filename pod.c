@@ -31,14 +31,15 @@ void get_covariance(MPI_Comm comm, Vec *Q, PetscInt n, Mat *R)
 
 }
 
-void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscScalar tol,
+void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscReal tol,
         Vec **xr, PetscInt *rank)
 {
     PetscPrintf(comm, "Computing POD eigenvectors... ");
 
     EPS eps;
     PetscInt nconv, i;
-    PetscScalar kr=0, kr1=0;
+    PetscScalar ckr, ckr1;
+    PetscReal kr, kr1;
 
     // Create eigenvalue solver context
     EPSCreate(comm, &eps);
@@ -57,7 +58,12 @@ void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscScalar tol,
     MatCreateVecs(*A, NULL, &(xr[0][0]));
 
     // Get first eigenpair
-    EPSGetEigenpair(eps, 0, &kr1, NULL, xr[0][0], NULL);
+    EPSGetEigenpair(eps, 0, &ckr1, NULL, xr[0][0], NULL);
+#if defined(PETSC_USE_COMPLEX)
+    kr1 = PetscRealPart(ckr1);
+#else
+    kr1 = ckr1;
+#endif
     VecScale(xr[0][0], 1.0/sqrt(kr1)); // Scale eigenvector by sqrt of eigenvalue
     *rank = 1;
 
@@ -67,7 +73,12 @@ void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscScalar tol,
     i = 1;
     while( i < nconv)
     {
-        EPSGetEigenvalue(eps, i, &kr, NULL);
+        EPSGetEigenvalue(eps, i, &ckr, NULL);
+#if defined(PETSC_USE_COMPLEX)
+        kr = PetscRealPart(ckr);
+#else
+        kr = ckr;
+#endif
         if(kr/kr1 > tol)
         {
             VecDuplicate(xr[0][0], &(xr[0][*rank]));
@@ -95,7 +106,7 @@ void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscScalar tol,
     PetscPrintf(comm, "Done\n");
 }
 
-void pod_orthogonalise(MPI_Comm comm, Vec *Q, PetscInt n_q, PetscScalar tol,
+void pod_orthogonalise(MPI_Comm comm, Vec *Q, PetscInt n_q, PetscReal tol,
         Vec **Q1, PetscInt *rank)
 {
     PetscPrintf(comm, "POD Orthogonalisation...\n");

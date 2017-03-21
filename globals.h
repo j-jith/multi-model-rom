@@ -25,9 +25,9 @@ void write_vec_file(MPI_Comm comm, const char filename[], Vec *b);
 
 // POD functions for orthogonalisation
 void get_covariance(MPI_Comm comm, Vec *Q, PetscInt n, Mat *R);
-void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscScalar tol,
+void get_pod_eigenvectors(MPI_Comm comm, Mat *A, PetscReal tol,
         Vec **xr, PetscInt *rank);
-void pod_orthogonalise(MPI_Comm comm, Vec *Q, PetscInt n_q, PetscScalar tol,
+void pod_orthogonalise(MPI_Comm comm, Vec *Q, PetscInt n_q, PetscReal tol,
         Vec **Q1, PetscInt *rank);
 void check_orthogonality(MPI_Comm comm, Vec *Q, PetscInt n_q);
 
