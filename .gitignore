@@ -8,4 +8,5 @@
 matrices
 
 # binary files
-mmr
+**/mmr
+**/main

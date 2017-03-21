@@ -16,10 +16,10 @@ int main(int argc, char **args)
     PetscReal mu = 4129.28;
 
     // Filenames of matrices and vectors
-    char mass_file[] = "./matrices/mass.dat";
-    char stiff_file[] = "./matrices/stiffness.dat";
-    char damp_file[] = "./matrices/damping.dat";
-    char load_file[] = "./matrices/force.dat";
+    char mass_file[] = "./toy/matrices/mass.dat";
+    char stiff_file[] = "./toy/matrices/stiffness.dat";
+    char damp_file[] = "./toy/matrices/damping.dat";
+    char load_file[] = "./toy/matrices/load.dat";
     char q_file[100];
 
     // Full matrices and vectors
@@ -74,14 +74,13 @@ int main(int argc, char **args)
     }
 
     // Read matrices from disk
-    //read_mat_file(MPI_COMM_WORLD, mass_file, &M);
-    //read_mat_file(MPI_COMM_WORLD, stiff_file, &K);
-    //read_mat_file(MPI_COMM_WORLD, damp_file, &C);
-    //read_vec_file(MPI_COMM_WORLD, load_file, &b);
-    Mat_Parallel_Load(MPI_COMM_WORLD, mass_file, &M);
-    Mat_Parallel_Load(MPI_COMM_WORLD, stiff_file, &K);
-    Mat_Parallel_Load(MPI_COMM_WORLD, damp_file, &C);
-    //Mat_Parallel_Load(MPI_COMM_WORLD, load_file, &b);
+    read_mat_file(MPI_COMM_WORLD, mass_file, &M);
+    read_mat_file(MPI_COMM_WORLD, stiff_file, &K);
+    read_mat_file(MPI_COMM_WORLD, damp_file, &C);
+    read_vec_file(MPI_COMM_WORLD, load_file, &b);
+    //Mat_Parallel_Load(MPI_COMM_WORLD, mass_file, &M);
+    //Mat_Parallel_Load(MPI_COMM_WORLD, stiff_file, &K);
+    //Mat_Parallel_Load(MPI_COMM_WORLD, damp_file, &C);
 
     // Allocate eigenvectors (real and imaginary parts)
     PetscMalloc1(n_ip*n_eig, &Qr);

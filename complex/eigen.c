@@ -20,9 +20,9 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscComplex ip, PetscInt n_
 
     // Solver type
     // Linear
-    PEPSetType(pep, PEPLINEAR);
-    PEPLinearSetCompanionForm(pep, 1);
-    PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
+    //PEPSetType(pep, PEPLINEAR);
+    //PEPLinearSetCompanionForm(pep, 1);
+    //PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
 
     //PEPSetType(pep, PEPQARNOLDI);
     //ST st; PEPGetST(pep, &st);
@@ -35,7 +35,7 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscComplex ip, PetscInt n_
     //PCFactorSetMatSolverPackage(pc, MATSOLVERMUMPS);
 
     // Which eigenvalues to compute
-    PEPSetWhichEigenpairs(pep, PEP_LARGEST_MAGNITUDE);
+    //PEPSetWhichEigenpairs(pep, PEP_SMALLEST_MAGNITUDE);
     //PEPSetWhichEigenpairs(pep, PEP_TARGET_IMAGINARY);
     //PEPSetTarget(pep, 00.0);
 
@@ -43,6 +43,9 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscComplex ip, PetscInt n_
     PEPSetDimensions(pep, n_eig, PETSC_DEFAULT, PETSC_DEFAULT);
     // Tolerance and max. iterations
     PEPSetTolerances(pep, 1e-10, 1000);
+
+    // User supplied options
+    PEPSetFromOptions(pep);
 
     // Solve eigenproblem
     PetscPrintf(comm, "Solving...");

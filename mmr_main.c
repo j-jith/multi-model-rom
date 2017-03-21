@@ -18,13 +18,14 @@ int main(int argc, char **args)
     // POD tolerance
     PetscInt pod_tolerance = 0;
     // Biot damping function realxation parameter
-    PetscReal mu = 4129.28;
+    //PetscReal mu = 4129.28;
+    PetscReal mu = 1;
 
     // Filenames of matrices and vectors
-    char mass_file[] = "./matrices/mass.dat";
-    char stiff_file[] = "./matrices/stiffness.dat";
-    char damp_file[] = "./matrices/damping.dat";
-    char load_file[] = "./matrices/force.dat";
+    char mass_file[] = "./toy/matrices/mass.dat";
+    char stiff_file[] = "./toy/matrices/stiffness.dat";
+    char damp_file[] = "./toy/matrices/damping.dat";
+    char load_file[] = "./toy/matrices/load.dat";
     char q_file[100];
 
     // Full matrices and vectors

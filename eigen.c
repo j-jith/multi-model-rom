@@ -22,10 +22,18 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscReal ip, PetscInt n_eig
     //PEPSetProblemType(pep, PEP_HERMITIAN);
 
     // Solver type
+    PEPSetType(pep, PEPQARNOLDI);
+    PEPGetST(pep, &st);
+    STSetTransform(st, PETSC_TRUE);
+    //STSetShift(st, 0.0);
+
+    //PEPSetType(pep, PEPLINEAR);
+    //PEPLinearSetCompanionForm(pep, 1);
+    //PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
+
+    /*
     // Linear
     PEPSetType(pep, PEPLINEAR);
-    PEPLinearSetCompanionForm(pep, 1);
-    PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
     PEPLinearGetEPS(pep, &eps);
     EPSSetType(eps, EPSKRYLOVSCHUR);
     EPSGetST(eps, &st);
@@ -45,9 +53,10 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscReal ip, PetscInt n_eig
     KSPGetPC(ksp, &pc);
     PCSetType(pc, PCLU);
     PCFactorSetMatSolverPackage(pc, MATSOLVERMUMPS);
+    */
 
     // Which eigenvalues to compute
-    //PEPSetWhichEigenpairs(pep, PEP_LARGEST_MAGNITUDE);
+    PEPSetWhichEigenpairs(pep, PEP_SMALLEST_MAGNITUDE);
     //PEPSetWhichEigenpairs(pep, PEP_TARGET_MAGNITUDE);
     //PEPSetTarget(pep, 0.0);
 
