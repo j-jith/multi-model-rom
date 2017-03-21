@@ -1,6 +1,6 @@
 #include "globals.h"
 
-void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscReal ip, PetscInt n_eig, Vec *Qr, Vec *Qi, PetscInt *nq)
+void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscComplex ip, PetscInt n_eig, Vec *Qr, Vec *Qi, PetscInt *nq)
 {
     Mat A[3];
     PEP pep;
@@ -10,51 +10,39 @@ void eigensolve(MPI_Comm comm, Mat M, Mat C, Mat K, PetscReal ip, PetscInt n_eig
     PetscInt i, its, nev, nconv;
     PetscReal err, re, im;
 
-    EPS eps; ST st;
-    KSP ksp; PC pc;
-
     // Set up problem
     PEPCreate(comm, &pep);
     A[0] = K; A[1] = C; A[2] = M;
     PEPSetOperators(pep, 3, A);
 
     // Problem type
-    //PEPSetProblemType(pep, PEP_HERMITIAN);
+    PEPSetProblemType(pep, PEP_HERMITIAN);
 
     // Solver type
     // Linear
     PEPSetType(pep, PEPLINEAR);
     PEPLinearSetCompanionForm(pep, 1);
     PEPLinearSetExplicitMatrix(pep, PETSC_TRUE);
-    PEPLinearGetEPS(pep, &eps);
-    EPSSetType(eps, EPSKRYLOVSCHUR);
-    EPSGetST(eps, &st);
-    STSetType(st, STSINVERT);
-    //EPSSetWhichEigenpairs(eps, EPS_TARGET_MAGNITUDE);
-    //EPSSetTarget(eps, ip*ip);
-    EPSSetWhichEigenpairs(eps, EPS_SMALLEST_IMAGINARY);
 
     //PEPSetType(pep, PEPQARNOLDI);
     //ST st; PEPGetST(pep, &st);
     //STSetTransform(st, PETSC_TRUE);
-    //STSetShift(st, 0.0);
-
-    // Direct factorisation with MUMPS
-    STGetKSP(st, &ksp);
-    KSPSetType(ksp, KSPPREONLY);
-    KSPGetPC(ksp, &pc);
-    PCSetType(pc, PCLU);
-    PCFactorSetMatSolverPackage(pc, MATSOLVERMUMPS);
+    //STSetShift(st, ip);
+    //KSP ksp; STGetKSP(st, &ksp);
+    //KSPSetType(ksp, KSPPREONLY);
+    //PC pc; KSPGetPC(ksp, &pc);
+    //PCSetType(pc, PCLU);
+    //PCFactorSetMatSolverPackage(pc, MATSOLVERMUMPS);
 
     // Which eigenvalues to compute
-    //PEPSetWhichEigenpairs(pep, PEP_LARGEST_MAGNITUDE);
-    //PEPSetWhichEigenpairs(pep, PEP_TARGET_MAGNITUDE);
-    //PEPSetTarget(pep, 0.0);
+    PEPSetWhichEigenpairs(pep, PEP_LARGEST_MAGNITUDE);
+    //PEPSetWhichEigenpairs(pep, PEP_TARGET_IMAGINARY);
+    //PEPSetTarget(pep, 00.0);
 
     // No. of eigenvalues to compute
     PEPSetDimensions(pep, n_eig, PETSC_DEFAULT, PETSC_DEFAULT);
     // Tolerance and max. iterations
-    //PEPSetTolerances(pep, 1e-10, 1000);
+    PEPSetTolerances(pep, 1e-10, 1000);
 
     // Solve eigenproblem
     PetscPrintf(comm, "Solving...");

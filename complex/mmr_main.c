@@ -1,13 +1,8 @@
 #include "globals.h"
 
-PetscReal damp_func_real(PetscReal mu, PetscReal w)
+PetscComplex damp_func(PetscReal mu, PetscComplex s)
 {
-    return mu/(mu*mu + w*w);
-}
-
-PetscReal damp_func_imag(PetscReal mu, PetscReal w)
-{
-    return -mu*w/(mu*mu + w*w);
+    return mu/(mu + s);
 }
 
 int main(int argc, char **args)
@@ -28,16 +23,16 @@ int main(int argc, char **args)
     char q_file[100];
 
     // Full matrices and vectors
-    Mat M0, C0, K0;
-    Mat M, C1, C2, K, Cw;
-    Vec b0, b, *Qr, *Qi;
+    Mat M, C, K, Cs;
+    Vec b, *Qr, *Qi;
 
     // Reduced matrices and vectors
     Mat Mr, Cr, Kr;
     Vec br, *ur;
 
     // Frequency domain
-    PetscReal omega_0, omega_i, omega_f, *omega;
+    PetscReal omega_i, omega_f, *omega;
+    PetscComplex *s;
     PetscInt omega_len;
     // Interpolation points
     PetscInt *ind_ip;
@@ -65,6 +60,11 @@ int main(int argc, char **args)
 
     // Initialise freqeuncy domain
     omega = linspace(omega_i, omega_f, omega_len);
+    PetscMalloc1(omega_len, &s);
+    for(i=0; i<omega_len; i++)
+    {
+        s[i] = PETSC_i * omega[i];
+    }
     // Initialise interpolation points
     ind_ip_tmp = linspace(0, omega_len-1, n_ip+1);
     PetscMalloc1(n_ip, &ind_ip);
@@ -74,20 +74,14 @@ int main(int argc, char **args)
     }
 
     // Read matrices from disk
-    read_mat_file(MPI_COMM_WORLD, mass_file, &M0);
-    read_mat_file(MPI_COMM_WORLD, stiff_file, &K0);
-    read_mat_file(MPI_COMM_WORLD, damp_file, &C0);
-    read_vec_file(MPI_COMM_WORLD, load_file, &b0);
-
-    // Create block matrices
-    create_block_mass(PETSC_COMM_WORLD, &M0, &M);
-    create_block_stiffness(PETSC_COMM_WORLD, &K0, &K);
-    create_block_damping(PETSC_COMM_WORLD, &C0, &C1, &C2);
-    create_block_load(PETSC_COMM_WORLD, &b0, &b);
-
-    // Destroy small matrices
-    MatDestroy(&M0); MatDestroy(&C0);
-    MatDestroy(&K0); VecDestroy(&b0);
+    //read_mat_file(MPI_COMM_WORLD, mass_file, &M);
+    //read_mat_file(MPI_COMM_WORLD, stiff_file, &K);
+    //read_mat_file(MPI_COMM_WORLD, damp_file, &C);
+    //read_vec_file(MPI_COMM_WORLD, load_file, &b);
+    Mat_Parallel_Load(MPI_COMM_WORLD, mass_file, &M);
+    Mat_Parallel_Load(MPI_COMM_WORLD, stiff_file, &K);
+    Mat_Parallel_Load(MPI_COMM_WORLD, damp_file, &C);
+    //Mat_Parallel_Load(MPI_COMM_WORLD, load_file, &b);
 
     // Allocate eigenvectors (real and imaginary parts)
     PetscMalloc1(n_ip*n_eig, &Qr);
@@ -96,14 +90,11 @@ int main(int argc, char **args)
     n_tot=0;
     for(i=0; i<n_ip; i++)
     {
-        omega_0 = omega[ind_ip[i]];
-
         PetscPrintf(PETSC_COMM_WORLD, "Eigenproblem at interpolation point #%d ...\n", i+1);
-        MatDuplicate(C1, MAT_COPY_VALUES, &Cw);
-        MatScale(Cw, damp_func_real(mu, omega_0));
-        MatAXPY(Cw, damp_func_imag(mu, omega_0), C2, DIFFERENT_NONZERO_PATTERN);
+        MatDuplicate(C, MAT_COPY_VALUES, &Cs);
+        MatScale(Cs, damp_func(mu, s[ind_ip[i]]));
 
-        eigensolve(PETSC_COMM_WORLD, M, Cw, K, omega_0, n_eig, &(Qr[n_tot]), &(Qi[n_tot]), &nq);
+        eigensolve(PETSC_COMM_WORLD, M, C, K, s[ind_ip[i]], n_eig, &(Qr[n_tot]), &(Qi[n_tot]), &nq);
         n_tot += nq;
     }
 

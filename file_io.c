@@ -72,4 +72,3 @@ void write_vec_file(MPI_Comm comm, const char filename[], Vec *b)
     PetscViewerDestroy(&viewer);
 }
 
-
