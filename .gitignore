@@ -10,3 +10,6 @@ matrices
 # binary files
 **/mmr
 **/main
+
+# python cache
+**/__pycache__
