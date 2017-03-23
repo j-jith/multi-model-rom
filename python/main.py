@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from problem import SerialSMD, PointLoad
 from multimodel import MultiModelROM
+from multisoar import MultiSOARROM
 
 if __name__ == '__main__':
 
@@ -36,11 +37,19 @@ if __name__ == '__main__':
     # plt.semilogy(omega, np.abs(u), 'r');
     # plt.show()
 
-    # Compare with ROM
-    rom = MultiModelROM(prob.M, prob.C, prob.K, f.vec, damp_func)
-    rom.reduce(omega, 5, 5)
-    ur = rom.get_frf(omega, N-1)
+    # Full system
     u = prob.get_frf(omega, f, N-1)
+
+    # Multi-model ROM
+    mmr = MultiModelROM(prob.M, prob.C, prob.K, f.vec, damp_func)
+    mmr.reduce(omega, 5, 5)
+    ur1 = mmr.get_frf(omega, N-1)
+
+    soar = MultiSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func)
+    soar.reduce(omega, 4, 4)
+    ur2 = soar.get_frf(omega, N-1)
+
     plt.semilogy(omega, np.abs(u))
-    plt.semilogy(omega, np.abs(ur), 'r');
+    plt.semilogy(omega, np.abs(ur1), 'r');
+    plt.semilogy(omega, np.abs(ur2), 'g');
     plt.show()
