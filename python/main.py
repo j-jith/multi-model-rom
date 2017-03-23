@@ -42,11 +42,11 @@ if __name__ == '__main__':
 
     # Multi-model ROM
     mmr = MultiModelROM(prob.M, prob.C, prob.K, f.vec, damp_func)
-    mmr.reduce(omega, 5, 5)
+    mmr.reduce(omega, 2, 5)
     ur1 = mmr.get_frf(omega, N-1)
 
     soar = MultiSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func)
-    soar.reduce(omega, 4, 4)
+    soar.reduce(omega, 2, 5)
     ur2 = soar.get_frf(omega, N-1)
 
     plt.semilogy(omega, np.abs(u))
