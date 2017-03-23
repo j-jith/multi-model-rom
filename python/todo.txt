@@ -1,4 +1,1 @@
-- port ``toy.py`` to OOP in ``problem.py``
-- finish ROM in ``multimodel.py``
-- compare with full FRF
 - compare with our ROM
