@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from problem import SerialSMD, PointLoad
 from multimodel import MultiModelROM
 from multisoar import MultiSOARROM
+from piecewise_soar import PiecewiseSOARROM
+from fit_complex import SuperModel
+
+def rel_err(u0, u1):
+    return np.abs(1-u1/u0)
 
 if __name__ == '__main__':
 
@@ -17,7 +22,7 @@ if __name__ == '__main__':
     # Stiffness
     k = [100]
     # Frequency domain
-    omega = np.linspace(0, 0.5, 500)
+    omega = np.linspace(1e-6, 0.5, 500)
     # Damping function
     def damp_func(omega, **kwargs):
         return 1e4*(omega**3-omega)
@@ -49,7 +54,23 @@ if __name__ == '__main__':
     soar.reduce(omega, 2, 5)
     ur2 = soar.get_frf(omega, N-1)
 
+    s = 1j*omega
+    ydata = damp_func(omega)
+    def fit(x, cc):
+        return cc[0]/x + cc[1] + cc[2]*x
+    models = SuperModel(fit, 3, s, ydata)
+    models.greedy_fit()
+    models.compute_weights()
+
+    psoar = PiecewiseSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func, models)
+    psoar.reduce(omega, 2, 5)
+    ur3 = psoar.get_frf(omega, N-1)
+
+    e2 = rel_err(u, ur2)
+    e3 = rel_err(u, ur3)
+
     plt.semilogy(omega, np.abs(u))
     plt.semilogy(omega, np.abs(ur1), 'r');
     plt.semilogy(omega, np.abs(ur2), 'g');
+    plt.semilogy(omega, np.abs(ur3), 'k');
     plt.show()

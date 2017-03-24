@@ -5,13 +5,13 @@ import scipy.sparse as sparse
 import scipy.sparse.linalg as linalg
 
 class PiecewiseSOARROM:
-
-    def __init__(self, M, C, K, f, damp_func):
+    def __init__(self, M, C, K, f, damp_func, supermodel):
         self.M = M
         self.C = C
         self.K = K
         self.f = f
         self.damp_func = damp_func
+        self.supermodel = supermodel
 
         self.Q = None
         self.Mr = None
@@ -21,7 +21,23 @@ class PiecewiseSOARROM:
 
         self.is_reduced = False
 
-    def soar(self, M0, C0, K0, omega0, n):
+    def get_local_coeffs(self, idx):
+        cm = cc = ck = 0.
+        for w, fit in zip(self.supermodel.weights, self.supermodel.models):
+            cm = cm + w[idx]*fit.params[2]
+            cc = cc + w[idx]*fit.params[1]
+            ck = ck + w[idx]*fit.params[0]
+        return cm, cc, ck
+
+    def soar(self, omega0, idx, n):
+        cm, cc, ck = self.get_local_coeffs(idx)
+        M0 = self.M + cm*self.C
+        C0 = cc*self.C
+        K0 = self.K + ck*self.C
+
+        return self.soar_aux(M0, C0, K0, omega0, n)
+
+    def soar_aux(self, M0, C0, K0, omega0, n):
         '''
         Second-order Arnoldi Reduction(SOAR).
         Input: M, C, K - scipy csr_matrix
@@ -84,11 +100,11 @@ class PiecewiseSOARROM:
         N = self.M.shape[0]
         # Solve eigenproblem at interpolation points
         print('SOAR at interpolation point #1 ...')
-        Q = self.soar(omega[ind_ip[0]], n_arn)
+        Q = self.soar(omega[ind_ip[0]], 0, n_arn)
         if n_ip > 1:
             for i, w in enumerate(omega[ind_ip[1:]]):
                 print('SOAR at interpolation point #{} ...'.format(i+2))
-                q = self.soar(w, n_arn)
+                q = self.soar(w, i+1, n_arn)
                 Q = np.hstack((Q, q))
 
         # Orthogonalise union of eigenvectors

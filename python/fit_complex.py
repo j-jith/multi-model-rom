@@ -79,9 +79,9 @@ class SuperModel(object):
             y_i = self.ydata[split_index[ii-1]:split_index[ii]]
 
             if len(s_i) <= self.min_split_len:
-                print('Split too small (length < {}). Moving on'.format(MIN_SPLIT_LEN))
+                print('Split too small (length < {}). Moving on'.format(self.min_split_len))
                 if fit:
-                    if fit not in fit_list:
+                    if fit not in self.models:
                         self.models.append(fit)
                     split_index.pop(ii)
                     ii += 1
@@ -90,7 +90,7 @@ class SuperModel(object):
                     break
             elif n_iter > self.maxit:
                 print('Exceeded max. iterations in split. Moving on. Max. error = {}'.format(fit.get_err_max()))
-                if fit not in fit_list:
+                if fit not in self.models:
                     self.models.append(fit)
                 split_index.pop(ii)
                 ii += 1
@@ -128,7 +128,7 @@ class SuperModel(object):
                 weights[i,:] = weights[i,:]/np.sum(weights[i,:])
 
         weights[weights<self.eps] = 0
-        self.weights = weights
+        self.weights = weights.T
 
 
 if __name__ == '__main__':
@@ -161,7 +161,7 @@ if __name__ == '__main__':
         ax1.plot(f.xdata.imag, f.eval().imag)
     # Weights
     fig2, ax2 = plt.subplots()
-    for w in models.weights.T:
+    for w in models.weights:
         ax2.plot(s.imag, w)
     # Show plot
     plt.show()
