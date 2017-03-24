@@ -13,3 +13,7 @@ matrices
 
 # python cache
 **/__pycache__
+
+# vim backup
+*.*.swp
+*.*.swo

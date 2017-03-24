@@ -1,4 +1,3 @@
 - compare with our ROM
-    - port the weighting functions
     - generate local matrices
     - pass local matrices to SOAR
