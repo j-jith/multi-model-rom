@@ -45,14 +45,17 @@ if __name__ == '__main__':
     # Full system
     u = prob.get_frf(omega, f, N-1)
 
+    rom_m = 3
+    rom_n = 6
+
     # Multi-model ROM
     mmr = MultiModelROM(prob.M, prob.C, prob.K, f.vec, damp_func)
-    mmr.reduce(omega, 2, 5)
+    mmr.reduce(omega, rom_m, rom_n)
     ur1 = mmr.get_frf(omega, N-1)
 
-    soar = MultiSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func)
-    soar.reduce(omega, 2, 5)
-    ur2 = soar.get_frf(omega, N-1)
+    #soar = MultiSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func)
+    #soar.reduce(omega, 2, 5)
+    #ur2 = soar.get_frf(omega, N-1)
 
     s = 1j*omega
     ydata = damp_func(omega)
@@ -63,14 +66,19 @@ if __name__ == '__main__':
     models.compute_weights()
 
     psoar = PiecewiseSOARROM(prob.M, prob.C, prob.K, f.vec, damp_func, models)
-    psoar.reduce(omega, 2, 5)
+    psoar.reduce(omega, rom_m, rom_n)
     ur3 = psoar.get_frf(omega, N-1)
 
-    e2 = rel_err(u, ur2)
-    e3 = rel_err(u, ur3)
+    #e2 = rel_err(u, ur2)
+    #e3 = rel_err(u, ur3)
 
-    plt.semilogy(omega, np.abs(u))
-    plt.semilogy(omega, np.abs(ur1), 'r');
-    plt.semilogy(omega, np.abs(ur2), 'g');
-    plt.semilogy(omega, np.abs(ur3), 'k');
+    fig, ax = plt.subplots()
+    ax.semilogy(omega, np.abs(u), 'k')
+    ax.semilogy(omega, np.abs(ur1), 'k:')
+    #ax.semilogy(omega, np.abs(ur2), 'g')
+    ax.semilogy(omega, np.abs(ur3), 'k--')
+    ax.set_xlabel(r'Frequency, $\omega$ [rad/s]')
+    ax.set_ylabel('Displacment [m]')
+    ax.legend(['Full system', 'Multi-model', 'Proposed ROM'])
+    fig.tight_layout()
     plt.show()

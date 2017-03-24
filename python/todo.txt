@@ -1,3 +1,0 @@
-- compare with our ROM
-    - generate local matrices
-    - pass local matrices to SOAR

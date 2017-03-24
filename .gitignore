@@ -11,6 +11,9 @@ matrices
 **/mmr
 **/main
 
+# figures
+**/figures
+
 # python cache
 **/__pycache__
 

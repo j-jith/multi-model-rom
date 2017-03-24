@@ -149,19 +149,34 @@ if __name__ == '__main__':
     models.greedy_fit()
     models.compute_weights()
 
-    # Real part
+    # # Real part
+    # fig, ax = plt.subplots()
+    # ax.plot(s.imag, y.real)
+    # for f in models.models:
+    #     ax.plot(f.xdata.imag, f.eval().real)
+    # # Imaginary part
+    # fig1, ax1 = plt.subplots()
+    # ax1.plot(s.imag, y.imag)
+    # for f in models.models:
+    #     ax1.plot(f.xdata.imag, f.eval().imag)
+    # # Weights
+    # fig2, ax2 = plt.subplots()
+    # for w in models.weights:
+    #     ax2.plot(s.imag, w)
+    # # Show plot
+    # plt.show()
+
+
     fig, ax = plt.subplots()
-    ax.plot(s.imag, y.real)
+    lf, = ax.plot(s.imag, y.real, 'k-')
     for f in models.models:
-        ax.plot(f.xdata.imag, f.eval().real)
-    # Imaginary part
-    fig1, ax1 = plt.subplots()
-    ax1.plot(s.imag, y.imag)
+        lg, = ax.plot(f.xdata.imag[0:2:], f.eval().real[0:2:], 'ko', markersize=4.)
+    ylims = ax.get_ylim()
     for f in models.models:
-        ax1.plot(f.xdata.imag, f.eval().imag)
-    # Weights
-    fig2, ax2 = plt.subplots()
-    for w in models.weights:
-        ax2.plot(s.imag, w)
-    # Show plot
+        ax.plot([f.xdata.imag[0], f.xdata.imag[0]], [ylims[0], ylims[1]], 'k:', linewidth=1.)
+    ax.plot([f.xdata.imag[-1], f.xdata.imag[-1]], [ylims[0], ylims[1]], 'k:', linewidth=1.)
+    ax.set_xlabel(r'Frequency, $\omega$ [rad/s]')
+    ax.set_ylabel(r'$g(\omega)$')
+    ax.legend([lf, lg], [r'$g(\omega)$', r'$\hat g(\omega)$'])
+    fig.tight_layout()
     plt.show()
